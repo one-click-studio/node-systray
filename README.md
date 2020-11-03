@@ -1,6 +1,6 @@
 # node-systray
 
-> SysTray library for nodejs using [systray-portable](https://github.com/zaaack/systray-portable) (a portable version of [the go systray library](https://github.com/getlantern/systray)).
+> SysTray library for nodejs using [systray-portable](https://github.com/felixhao28/systray-portable) (a portable version of [the go systray library](https://github.com/getlantern/systray)).
 
 
 ## Install
@@ -63,11 +63,7 @@ systray.onClick(action => {
 
 ```
 
-For more API info please see https://zaaack.github.io/node-systray/
-
 Here is also a demo project you might want to check out, it shows how to integrate this library with [opn](https://github.com/sindresorhus/opn), [node-notifier](https://github.com/mikaelbr/node-notifier) and [node-packer](https://github.com/pmq20/node-packer):
-
-> https://github.com/zaaack/aria2c-node-gui
 
 ## License
 MIT
