@@ -10,3 +10,11 @@ node_modules
 .editorconfig
 .gitignore
 test-dist
+.vscode
+src
+test
+.tsignore
+benchmark.txt
+test.ts
+tsconfig.json
+tslint.json

@@ -5,14 +5,11 @@
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "scripts": {
-    "build": "run-s clean build:lib doc && git add -A",
-    "build:lib": "tsc",
-    "clean": "del ./lib/**",
+    "build": "tsc",
     "lint": "tslint ./src/** --type-check -p ./tsconfig.json",
     "test": "cross-env DEBUG=systray* mocha -r ts-node/register ./test/**/*.test.ts",
-    "doc": "typedoc --theme minimal --out ./docs ./src && touch ./docs/.nojekyll",
     "cover": "cross-env NODE_ENV=development nyc ava",
-    "preversion": "npm run build && git add -A"
+    "preversion": "npm run build"
   },
   "engines": {
     "node": ">=4.0.0"
