@@ -83,7 +83,7 @@ systray.onClick(action => {
 
 ```
 
-Here is also a demo project you might want to check out, it shows how to integrate this library with [opn](https://github.com/sindresorhus/opn), [node-notifier](https://github.com/mikaelbr/node-notifier) and [node-packer](https://github.com/pmq20/node-packer):
+To integrate with packing tools like `webpack`, use something like `copy-webpack-plugin` to copy the desired `tray_*_release[.exe]` to the `traybin/` folder of the working directory.
 
 ## License
 MIT
