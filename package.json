@@ -6,6 +6,7 @@
   "typings": "lib/index.d.ts",
   "scripts": {
     "build": "tsc",
+    "watch": "tsc --watch",
     "lint": "tslint ./src/** --type-check -p ./tsconfig.json",
     "test": "cross-env DEBUG=systray* mocha -r ts-node/register ./test/**/*.test.ts",
     "cover": "cross-env NODE_ENV=development nyc ava",

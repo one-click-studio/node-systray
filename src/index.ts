@@ -3,6 +3,7 @@ import * as path from "path";
 import * as os from "os";
 import * as fs from "fs-extra";
 import * as readline from "readline";
+const pkg = require('../package.json')
 
 function debug(msgType: string, ...msg: any[]) {
   // console.log(msgType + ":" + msg.map(m => {
@@ -90,13 +91,13 @@ const getTrayBinPath = async (debug: boolean = false, copyDir: boolean | string 
     copyDir = path.join((
       typeof copyDir === "string"
         ? copyDir
-        : `${os.homedir()}/.cache/node-systray/`), "tmp");
+        : `${os.homedir()}/.cache/node-systray/`), pkg.version);
 
     const copyDistPath = path.join(copyDir, binName);
     try {
       await fs.stat(copyDistPath);
     } catch (error) {
-      await fs.ensureDir(copyDistPath);
+      await fs.ensureDir(copyDir);
       await fs.copy(binPath, copyDistPath);
     }
 
@@ -122,38 +123,42 @@ export default class SysTray {
   protected _process: child.ChildProcess;
   protected _rl: readline.ReadLine;
   protected _binPath: string;
+  private _ready: Promise<void>;
 
   constructor(conf: Conf) {
     this._conf = conf;
     this._process = null!;
     this._rl = null!;
     this._binPath = null!;
+    this._ready = this.init();
   }
 
-  async init() {
+  private async init() {
     const conf = this._conf;
     this._binPath = await getTrayBinPath(conf.debug, conf.copyDir);
-    if (process.platform == "win32") {
-      try {
-        await fs.stat(this._binPath);
-      } catch (error) {
-        child.exec("cscript alert-win.vbs");
-      }
-    }
     try {
       await fs.chmod(this._binPath, "+x");
     } catch (error) {
       // ignore
     }
-    this._process = child.spawn(this._binPath, [], {
-      windowsHide: true,
+    return new Promise<void>((resolve, reject) => {
+      this._process = child.spawn(this._binPath, [], {
+        windowsHide: true,
+      });
+      this._rl = readline.createInterface({
+        input: this._process.stdout!,
+      });
+      conf.menu.items = conf.menu.items.map(updateCheckedInLinux);
+      this._rl.on("line", data => debug("onLine", data));
+      this.onReady(() => {
+        this.writeLine(JSON.stringify(conf.menu));
+        resolve();
+      });
     });
-    this._rl = readline.createInterface({
-      input: this._process.stdout!,
-    });
-    conf.menu.items = conf.menu.items.map(updateCheckedInLinux);
-    this._rl.on("line", data => debug("onLine", data));
-    this.onReady(() => this.writeLine(JSON.stringify(conf.menu)));
+  }
+
+  ready() {
+    return this._ready;
   }
 
   onReady(listener: () => void) {
@@ -167,7 +172,8 @@ export default class SysTray {
     return this;
   }
 
-  onClick(listener: (action: ClickEvent) => void) {
+  async onClick(listener: (action: ClickEvent) => void) {
+    await this.ready();
     this._rl.on("line", (line: string) => {
       const action: ClickEvent = JSON.parse(line);
       if (action.type === "clicked") {
@@ -178,7 +184,7 @@ export default class SysTray {
     return this;
   }
 
-  writeLine(line: string) {
+  private writeLine(line: string) {
     if (line) {
       debug("writeLine", line + "\n", "=====");
       this._process.stdin!.write(line.trim() + "\n");

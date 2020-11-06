@@ -81,6 +81,11 @@ systray.onClick(action => {
     }
 });
 
+// Systray.ready is a promise which resolves when the tray is ready.
+systray.ready().then(() => {
+    console.log("systray started!");
+});
+
 ```
 
 To integrate with packing tools like `webpack`, use something like `copy-webpack-plugin` to copy the desired `tray_*_release[.exe]` to the `traybin/` folder of the working directory.
