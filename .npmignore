@@ -11,8 +11,9 @@ node_modules
 .gitignore
 test-dist
 .vscode
-src
-test
+index.ts
+index.test.ts
+menu.json
 .tsignore
 benchmark.txt
 test.ts

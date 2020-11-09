@@ -8,7 +8,7 @@
     "build": "tsc",
     "watch": "tsc --watch",
     "lint": "tslint ./src/** --type-check -p ./tsconfig.json",
-    "test": "cross-env DEBUG=systray* mocha -r ts-node/register ./test/**/*.test.ts",
+    "test": "cross-env DEBUG=systray* mocha -r ts-node/register ./*.test.ts",
     "cover": "cross-env NODE_ENV=development nyc ava",
     "preversion": "npm run build"
   },

@@ -1,10 +1,12 @@
+// tslint:disable: no-floating-promises
 import * as os from 'os'
 import * as path from 'path'
 import * as assert from 'assert'
-import SysTray from '../src/index'
+import SysTray from './index'
 const menu = require('./menu.json')
-const pkg = require('../package.json')
-describe('test', function() {
+const pkg = require('./package.json')
+
+describe('test', function () {
   this.timeout(1000 * 24 * 3600)
 
   it('systray release is ok', async () => {
@@ -24,15 +26,15 @@ describe('test', function() {
       }
       console.log('action', action)
     })
-    await systray.ready();
-    console.log("Exit the tray in 1000ms...")
+    await systray.ready()
+    console.log('Exit the tray in 1000ms...')
     await new Promise((resolve, reject) => {
       setTimeout(() => {
-        systray.kill(false);
-        resolve();
-      }, 1000);
+        systray.kill(false)
+        resolve()
+      }, 1000)
     })
-    let {code, signal} = await new Promise<{code: number | null, signal: string | null}>(resolve => systray.onExit((code, signal) => resolve({code, signal})))
+    let { code, signal } = await new Promise<{ code: number | null, signal: string | null }>(resolve => systray.onExit((code, signal) => resolve({ code, signal })))
     console.log('code', code, 'signal', signal)
     assert.strictEqual(code, 0)
     assert.strictEqual(signal, null)
@@ -46,7 +48,7 @@ describe('test', function() {
       darwin: `tray_darwin${debug ? '' : '_release'}`,
       linux: `tray_linux${debug ? '' : '_release'}`,
     })[process.platform]
-    await systray.ready();
+    await systray.ready()
     assert.strictEqual(systray.binPath, path.resolve(`${os.homedir()}/.cache/node-systray/`, pkg.version, binName))
     systray.onClick(action => {
       if (action.seq_id === 0) {
@@ -63,14 +65,14 @@ describe('test', function() {
       }
       console.log('action', action)
     })
-    console.log("Exit the tray in 1000ms...")
+    console.log('Exit the tray in 1000ms...')
     await new Promise((resolve, reject) => {
       setTimeout(() => {
-        systray.kill(false);
-        resolve();
-      }, 1000);
+        systray.kill(false)
+        resolve()
+      }, 1000)
     })
-    let {code, signal} = await new Promise<{code: number | null, signal: string | null}>(resolve => systray.onExit((code, signal) => resolve({code, signal})))
+    let { code, signal } = await new Promise<{ code: number | null, signal: string | null }>(resolve => systray.onExit((code, signal) => resolve({ code, signal })))
     console.log('code', code, 'signal', signal)
     assert.strictEqual(code, 0)
   })
