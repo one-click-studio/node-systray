@@ -27,7 +27,9 @@ const systray = new SysTray({
             // checked is implemented by plain text in linux
             checked: true,
             enabled: true
-        }, {
+        },
+        SysTray.separator, // SysTray.separator is equivalent to a MenuItem with "title" equals "<SEPARATOR>"
+        {
             title: "aa2",
             tooltip: "bb",
             checked: false,

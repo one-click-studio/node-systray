@@ -119,8 +119,16 @@ function updateCheckedInLinux(item: MenuItem) {
 }
 
 export default class SysTray {
+  static separator : MenuItem = {
+    title: "<SEPARATOR>",
+    tooltip: "",
+    enabled: true,
+  }
   protected _conf: Conf
-  protected _process: child.ChildProcess
+  private _process: child.ChildProcess
+  public get process(): child.ChildProcess {
+    return this._process
+  }
   protected _rl: readline.ReadLine
   protected _binPath: string
   private _ready: Promise<void>
@@ -214,7 +222,7 @@ export default class SysTray {
    * @param exitNode Exit current node process after systray process is killed, default is true
    */
   async kill(exitNode = true) {
-    return new Promise((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       try {
         this.onExit(() => {
           resolve()

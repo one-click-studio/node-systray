@@ -8,6 +8,10 @@
     "checked": true,
     "enabled": true
   }, {
+    "title": "<SEPARATOR>",
+    "tooltip": "",
+    "enabled": true
+  }, {
     "title": "aa2",
     "tooltip": "bb",
     "checked": false,

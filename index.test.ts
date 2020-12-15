@@ -27,8 +27,11 @@ describe('test', function () {
       console.log('action', action)
     })
     await systray.ready()
+    systray.process.stderr?.on("data", (chunk) => {
+      console.log(chunk.toString())
+    })
     console.log('Exit the tray in 1000ms...')
-    await new Promise((resolve, reject) => {
+    await new Promise<void>((resolve, reject) => {
       setTimeout(() => {
         systray.kill(false)
         resolve()
@@ -66,7 +69,7 @@ describe('test', function () {
       console.log('action', action)
     })
     console.log('Exit the tray in 1000ms...')
-    await new Promise((resolve, reject) => {
+    await new Promise<void>((resolve, reject) => {
       setTimeout(() => {
         systray.kill(false)
         resolve()
