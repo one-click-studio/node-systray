@@ -13,9 +13,16 @@ test-dist
 .vscode
 index.ts
 index.test.ts
-menu.json
+menu.js
 .tsignore
 benchmark.txt
 test.ts
 tsconfig.json
 tslint.json
+example.js
+.eslintrc.js
+example.mjs
+index.js.map
+logo_s.ico
+logo_s.png
+tsconfig-lint.json

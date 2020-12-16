@@ -14,83 +14,91 @@ yarn add systray2
 
 ```ts
 import SysTray from 'systray2';
+import os from 'os'
 
+const item1 = {
+  title: 'aa',
+  tooltip: 'bb',
+  // checked is implemented by plain text in linux
+  checked: false,
+  enabled: true,
+  // click is not a standard property but a custom value
+  click: () => {
+    item1.checked = !item1.checked
+    systray.sendAction({
+      type: 'update-item',
+      item: item1,
+    })
+    // toggle Exit
+    itemExit.hidden = !itemExit.hidden
+    systray.sendAction({
+      type: 'update-item',
+      item: itemExit,
+    })
+  }
+}
+const item2 = {
+  title: 'aa2',
+  tooltip: 'bb',
+  checked: false,
+  enabled: true,
+  hidden: false,
+  // add a submenu item
+  items: [{
+    title: 'Submenu',
+    tooltip: 'this is a submenu item',
+    checked: false,
+    enabled: true,
+    click: () => {
+      // open the url
+      console.log('open the url')
+    }
+  }]
+}
+const itemExit = {
+  title: 'Exit',
+  tooltip: 'bb',
+  checked: false,
+  enabled: true,
+  click: () => {
+    systray.kill(false)
+  }
+}
 const systray = new SysTray({
-    menu: {
-        // you should use .png icon on macOS/Linux, and .ico format on Windows
-        icon: "<base64 image string>",
-        title: "标题",
-        tooltip: "Tips",
-        items: [{
-            title: "aa",
-            tooltip: "bb",
-            // checked is implemented by plain text in linux
-            checked: true,
-            enabled: true
-        },
-        SysTray.separator, // SysTray.separator is equivalent to a MenuItem with "title" equals "<SEPARATOR>"
-        {
-            title: "aa2",
-            tooltip: "bb",
-            checked: false,
-            enabled: true,
-            // hidden 
-            hidden: true
-        }, {
-            title: "Exit",
-            tooltip: "bb",
-            checked: false,
-            enabled: true
-        }]
-    },
-    debug: false,
-    copyDir: true, // copy go tray binary to outside directory, useful for packing tool like pkg.
-});
+  menu: {
+    // you should use .png icon on macOS/Linux, and .ico format on Windows
+    icon: os.platform() === 'win32' ? './logo_s.ico' : './logo_s.png',
+    title: '标题',
+    tooltip: 'Tips',
+    items: [
+      item1,
+      SysTray.separator, // SysTray.separator is equivalent to a MenuItem with "title" equals "<SEPARATOR>"
+      item2,
+      itemExit
+    ]
+  },
+  debug: false,
+  copyDir: false // copy go tray binary to outside directory, useful for packing tool like pkg.
+})
 
 systray.onClick(action => {
-    if (action.seq_id === 0) {
-        systray.sendAction({
-            type: 'update-item',
-            item: {
-                ...action.item,
-                checked: !action.item.checked,
-            },
-            seq_id: action.seq_id,
-        });
-        // show item 1
-        systray.sendAction({
-            type: 'update-item',
-            item: {
-                ...action.item,
-                hidden: false,
-            },
-            seq_id: 1,
-        });
-    } else if (action.seq_id === 1) {
-        // open the url
-        console.log('open the url', action);
-        // and then hide itself
-        systray.sendAction({
-            type: 'update-item',
-            item: {
-                ...action.item,
-                hidden: true,
-            },
-            seq_id: 1,
-        });
-    } else if (action.seq_id === 2) {
-        systray.kill();
-    }
-});
+  if (action.item.click != null) {
+    action.item.click()
+  }
+})
 
 // Systray.ready is a promise which resolves when the tray is ready.
 systray.ready().then(() => {
-    console.log("systray started!");
-});
+  console.log('systray started!')
+})
 
 ```
 
 To integrate with packing tools like `webpack`, use something like `copy-webpack-plugin` to copy the desired `tray_*_release[.exe]` to the `traybin/` folder of the working directory.
+
+## Known Issues
+
+Toggling `hiding` on a menu item with sub menu causes the sub menu to disappear.
 
 ## License
 MIT

@@ -1,3 +1,6 @@
+/* eslint-disable no-underscore-dangle */
+/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable @typescript-eslint/tslint/config */
 import * as child from 'child_process'
 import * as path from 'path'
 import * as os from 'os'
@@ -6,19 +9,19 @@ import * as readline from 'readline'
 const pkg = require('./package.json')
 
 function debug(msgType: string, ...msg: any[]) {
-  // console.log(msgType + ":" + msg.map(m => {
-  //   let t = typeof (m) === "string" ? m : JSON.stringify(m);
-  //   const p = t.indexOf("\"icon\":");
-  //   if (p >= 0) {
-  //     const e = t.indexOf("\"", p + 8);
-  //     t = t.substring(0, p + 8) + "<ICON>" + t.substring(e);
-  //   }
-  //   const limit = 500;
-  //   if (t.length > limit) {
-  //     t = t.substring(0, limit / 2) + "..." + t.substring(t.length - limit / 2);
-  //   }
-  //   return t;
-  // }).join(" "));
+  console.log(msgType + ':' + msg.map(m => {
+    let t = typeof (m) === 'string' ? m : JSON.stringify(m)
+    const p = t.indexOf('"icon":')
+    if (p >= 0) {
+      const e = t.indexOf('"', p + 8)
+      t = t.substring(0, p + 8) + '<ICON>' + t.substring(e)
+    }
+    const limit = 500
+    if (t.length > limit) {
+      t = t.substring(0, limit / 2) + '...' + t.substring(t.length - limit / 2)
+    }
+    return t
+  }).join(' '))
   return
 }
 
@@ -26,8 +29,15 @@ export interface MenuItem {
   title: string
   tooltip: string
   checked?: boolean
-  enabled: boolean
+  enabled?: boolean
   hidden?: boolean
+  items?: MenuItem[]
+  icon?: string
+}
+
+interface MenuItemEx extends MenuItem {
+  __id: number
+  items?: MenuItemEx[]
 }
 
 export interface Menu {
@@ -41,6 +51,7 @@ export interface ClickEvent {
   type: 'clicked'
   item: MenuItem
   seq_id: number
+  __id: number
 }
 
 export interface ReadyEvent {
@@ -52,20 +63,19 @@ export type Event = ClickEvent | ReadyEvent
 export interface UpdateItemAction {
   type: 'update-item'
   item: MenuItem
-  seq_id: number
+  seq_id?: number
 }
 
 export interface UpdateMenuAction {
   type: 'update-menu'
   menu: Menu
-  seq_id: number
 }
 
 export interface UpdateMenuAndItemAction {
   type: 'update-menu-and-item'
   menu: Menu
   item: MenuItem
-  seq_id: number
+  seq_id?: number
 }
 
 export interface ExitAction {
@@ -84,7 +94,7 @@ const getTrayBinPath = async (debug: boolean = false, copyDir: boolean | string 
   const binName = ({
     win32: `tray_windows${debug ? '' : '_release'}.exe`,
     darwin: `tray_darwin${debug ? '' : '_release'}`,
-    linux: `tray_linux${debug ? '' : '_release'}`,
+    linux: `tray_linux${debug ? '' : '_release'}`
   })[process.platform]
   const binPath = path.resolve(`./traybin/${binName}`)
   if (copyDir) {
@@ -108,21 +118,98 @@ const getTrayBinPath = async (debug: boolean = false, copyDir: boolean | string 
 const CHECK_STR = ' (√)'
 function updateCheckedInLinux(item: MenuItem) {
   if (process.platform !== 'linux') {
-    return item
+    return
   }
   if (item.checked) {
     item.title += CHECK_STR
   } else {
     item.title = (item.title || '').replace(RegExp(CHECK_STR + '$'), '')
   }
+  if (item.items != null) {
+    item.items.forEach(updateCheckedInLinux)
+  }
+}
+
+async function resolveIcon(item: MenuItem | Menu) {
+  let icon = item.icon
+  if (icon != null) {
+    if (await fs.pathExists(icon)) {
+      item.icon = await loadIcon(icon)
+    }
+  }
+  if (item.items != null) {
+    await Promise.all(item.items.map(_ => resolveIcon(_)))
+  }
   return item
 }
 
+function addInternalId(internalIdMap: Map<number, MenuItem>, item: MenuItemEx, counter = {id: 1}) {
+  const id = counter.id++
+  internalIdMap.set(id, item)
+  if (item.items != null) {
+    item.items.forEach(_ => addInternalId(internalIdMap, _, counter))
+  }
+  item.__id = id
+}
+
+function itemTrimmer(item: MenuItem) {
+  return {
+    title: item.title,
+    tooltip: item.tooltip,
+    checked: item.checked,
+    enabled: item.enabled === undefined ? true : item.enabled,
+    hidden: item.hidden,
+    items: item.items,
+    icon: item.icon,
+    __id: (item as MenuItemEx).__id
+  }
+}
+
+function menuTrimmer(menu: Menu) {
+  return {
+    icon: menu.icon,
+    title: menu.title,
+    tooltip: menu.tooltip,
+    items: menu.items.map(itemTrimmer)
+  }
+}
+
+function actionTrimer(action: Action) {
+  if (action.type === 'update-item') {
+    return {
+      type: action.type,
+      item: itemTrimmer(action.item),
+      seq_id: action.seq_id
+    }
+  } else if (action.type === 'update-menu') {
+    return {
+      type: action.type,
+      menu: menuTrimmer(action.menu)
+    }
+  } else if (action.type === 'update-menu-and-item') {
+    return {
+      type: action.type,
+      item: itemTrimmer(action.item),
+      menu: menuTrimmer(action.menu),
+      seq_id: action.seq_id
+    }
+  } else {
+    return {
+      type: action.type
+    }
+  }
+}
+
+async function loadIcon(fileName: string) {
+  const buffer = await fs.readFile(fileName)
+  return buffer.toString('base64')
+}
+
 export default class SysTray {
-  static separator : MenuItem = {
-    title: "<SEPARATOR>",
-    tooltip: "",
-    enabled: true,
+  static separator: MenuItem = {
+    title: '<SEPARATOR>',
+    tooltip: '',
+    enabled: true
   }
   protected _conf: Conf
   private _process: child.ChildProcess
@@ -132,6 +219,7 @@ export default class SysTray {
   protected _rl: readline.ReadLine
   protected _binPath: string
   private _ready: Promise<void>
+  private internalIdMap = new Map<number, MenuItem>()
 
   constructor(conf: Conf) {
     this._conf = conf
@@ -149,17 +237,20 @@ export default class SysTray {
     } catch (error) {
       // ignore
     }
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<void>(async (resolve, reject) => {
       this._process = child.spawn(this._binPath, [], {
-        windowsHide: true,
+        windowsHide: true
       })
       this._rl = readline.createInterface({
-        input: this._process.stdout!,
+        input: this._process.stdout!
       })
-      conf.menu.items = conf.menu.items.map(updateCheckedInLinux)
+      conf.menu.items.forEach(updateCheckedInLinux)
+      let counter = {id: 1}
+      conf.menu.items.forEach(_ => addInternalId(this.internalIdMap, _ as MenuItemEx, counter))
+      await resolveIcon(conf.menu)
       this._rl.on('line', data => debug('onLine', data))
       this.onReady(() => {
-        this.writeLine(JSON.stringify(conf.menu))
+        this.writeLine(JSON.stringify(menuTrimmer(conf.menu)))
         resolve()
       })
     })
@@ -185,6 +276,8 @@ export default class SysTray {
     this._rl.on('line', (line: string) => {
       const action: ClickEvent = JSON.parse(line)
       if (action.type === 'clicked') {
+        const item = this.internalIdMap.get(action.__id)!
+        action.item = Object.assign(item, action.item)
         debug('onClick', action)
         listener(action)
       }
@@ -200,29 +293,38 @@ export default class SysTray {
     return this
   }
 
-  sendAction(action: Action) {
+  async sendAction(action: Action) {
     switch (action.type) {
       case 'update-item':
-        action.item = updateCheckedInLinux(action.item)
+        updateCheckedInLinux(action.item)
+        if (action.seq_id == null) {
+          action.seq_id = -1
+        }
         break
       case 'update-menu':
-        action.menu.items = action.menu.items.map(updateCheckedInLinux)
+        action.menu.items.forEach(updateCheckedInLinux)
+        action.menu.items = await Promise.all(action.menu.items.map(_ => resolveIcon(_)))
         break
       case 'update-menu-and-item':
-        action.menu.items = action.menu.items.map(updateCheckedInLinux)
-        action.item = updateCheckedInLinux(action.item)
+        action.menu.items.forEach(updateCheckedInLinux)
+        await Promise.all(action.menu.items.map(_ => resolveIcon(_)))
+        updateCheckedInLinux(action.item)
+        if (action.seq_id == null) {
+          action.seq_id = -1
+        }
         break
     }
     debug('sendAction', action)
-    this.writeLine(JSON.stringify(action))
+    this.writeLine(JSON.stringify(actionTrimer(action)))
     return this
   }
   /**
    * Kill the systray process
+   *
    * @param exitNode Exit current node process after systray process is killed, default is true
    */
   async kill(exitNode = true) {
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<void>(async (resolve, reject) => {
       try {
         this.onExit(() => {
           resolve()
@@ -230,7 +332,7 @@ export default class SysTray {
             process.exit(0)
           }
         })
-        this.sendAction({
+        await this.sendAction({
           type: 'exit'
         })
         // this._rl.close();
