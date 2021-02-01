@@ -305,12 +305,12 @@ export default class SysTray {
         }
         break
       case 'update-menu':
+        action.menu = await resolveIcon(action.menu) as Menu;
         action.menu.items.forEach(updateCheckedInLinux)
-        action.menu.items = await Promise.all(action.menu.items.map(_ => resolveIcon(_)))
         break
       case 'update-menu-and-item':
+        action.menu = await resolveIcon(action.menu) as Menu;
         action.menu.items.forEach(updateCheckedInLinux)
-        await Promise.all(action.menu.items.map(_ => resolveIcon(_)))
         updateCheckedInLinux(action.item)
         if (action.seq_id == null) {
           action.seq_id = -1
