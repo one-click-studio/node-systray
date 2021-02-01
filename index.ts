@@ -96,7 +96,10 @@ const getTrayBinPath = async (debug: boolean = false, copyDir: boolean | string 
     darwin: `tray_darwin${debug ? '' : '_release'}`,
     linux: `tray_linux${debug ? '' : '_release'}`
   })[process.platform]
-  const binPath = path.resolve(`./traybin/${binName}`)
+  let binPath = path.join('.', 'traybin', binName)
+  if (!await fs.pathExists(binPath)) {
+    binPath = path.join(__dirname, 'traybin', binName)
+  }
   if (copyDir) {
     copyDir = path.join((
       typeof copyDir === 'string'
