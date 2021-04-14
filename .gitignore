@@ -40,3 +40,5 @@ index.js
 index.js.map
 es
 test-dist
+
+package-lock.json

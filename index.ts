@@ -8,7 +8,7 @@ import * as fs from 'fs-extra'
 import * as readline from 'readline'
 const pkg = require('./package.json')
 
-function debug(msgType: string, ...msg: any[]) {
+function _debug(msgType: string, ...msg: any[]) {
   console.log(msgType + ':' + msg.map(m => {
     let t = typeof (m) === 'string' ? m : JSON.stringify(m)
     const p = t.indexOf('"icon":')
@@ -251,7 +251,9 @@ export default class SysTray {
       let counter = {id: 1}
       conf.menu.items.forEach(_ => addInternalId(this.internalIdMap, _ as MenuItemEx, counter))
       await resolveIcon(conf.menu)
-      this._rl.on('line', data => debug('onLine', data))
+      if (conf.debug) {
+        this._rl.on('line', data => _debug('onLine', data))
+      }
       this.onReady(() => {
         this.writeLine(JSON.stringify(menuTrimmer(conf.menu)))
         resolve()
@@ -268,7 +270,9 @@ export default class SysTray {
       const action: Event = JSON.parse(line)
       if (action.type === 'ready') {
         listener()
-        debug('onReady', action)
+        if (this._conf.debug) {
+          _debug('onReady', action)
+        }
       }
     })
     return this
@@ -281,7 +285,9 @@ export default class SysTray {
       if (action.type === 'clicked') {
         const item = this.internalIdMap.get(action.__id)!
         action.item = Object.assign(item, action.item)
-        debug('onClick', action)
+        if (this._conf.debug) {
+          _debug('onClick', action)
+        }
         listener(action)
       }
     })
@@ -290,7 +296,9 @@ export default class SysTray {
 
   private writeLine(line: string) {
     if (line) {
-      debug('writeLine', line + '\n', '=====')
+      if (this._conf.debug) {
+        _debug('writeLine', line + '\n', '=====')
+      }
       this._process.stdin!.write(line.trim() + '\n')
     }
     return this
@@ -317,7 +325,9 @@ export default class SysTray {
         }
         break
     }
-    debug('sendAction', action)
+    if (this._conf.debug) {
+      _debug('sendAction', action)
+    }
     this.writeLine(JSON.stringify(actionTrimer(action)))
     return this
   }
@@ -352,7 +362,9 @@ export default class SysTray {
 
   onError(listener: (err: Error) => void) {
     this._process.on('error', err => {
-      debug('onError', err, 'binPath', this.binPath)
+      if (this._conf.debug) {
+        _debug('onError', err, 'binPath', this.binPath)
+      }
       listener(err)
     })
   }
