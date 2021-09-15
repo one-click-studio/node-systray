@@ -1,6 +1,6 @@
 {
   "name": "systray2",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "description": "An systray libray for nodejs, more updated than the original systray",
   "main": "index.js",
   "typings": "index.d.ts",
