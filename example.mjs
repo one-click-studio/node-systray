@@ -55,6 +55,7 @@ const systray = new SysTray.default({
   menu: {
     // you should use .png icon on macOS/Linux, and .ico format on Windows
     icon: os.platform() === 'win32' ? './logo_s.ico' : './logo_s.png',
+    isTemplateIcon: os.platform() === 'darwin',
     title: '标题',
     tooltip: 'Tips',
     items: [

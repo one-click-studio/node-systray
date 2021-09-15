@@ -33,6 +33,7 @@ export interface MenuItem {
   hidden?: boolean
   items?: MenuItem[]
   icon?: string
+  isTemplateIcon?: boolean
 }
 
 interface MenuItemEx extends MenuItem {
@@ -45,6 +46,7 @@ export interface Menu {
   title: string
   tooltip: string
   items: MenuItem[]
+  isTemplateIcon?: boolean
 }
 
 export interface ClickEvent {
@@ -164,6 +166,7 @@ function itemTrimmer(item: MenuItem) {
     hidden: item.hidden,
     items: item.items,
     icon: item.icon,
+    isTemplateIcon: item.isTemplateIcon,
     __id: (item as MenuItemEx).__id
   }
 }
@@ -173,7 +176,8 @@ function menuTrimmer(menu: Menu) {
     icon: menu.icon,
     title: menu.title,
     tooltip: menu.tooltip,
-    items: menu.items.map(itemTrimmer)
+    items: menu.items.map(itemTrimmer),
+    isTemplateIcon: menu.isTemplateIcon
   }
 }
 

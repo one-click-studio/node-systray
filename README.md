@@ -68,6 +68,8 @@ const systray = new SysTray({
   menu: {
     // you should use .png icon on macOS/Linux, and .ico format on Windows
     icon: os.platform() === 'win32' ? './logo_s.ico' : './logo_s.png',
+    // a template icon is a transparency mask that will appear to be dark in light mode and light in dark mode
+    isTemplateIcon: os.platform() === 'darwin',
     title: '标题',
     tooltip: 'Tips',
     items: [
