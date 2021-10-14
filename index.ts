@@ -245,23 +245,28 @@ export default class SysTray {
       // ignore
     }
     return new Promise<void>(async (resolve, reject) => {
-      this._process = child.spawn(this._binPath, [], {
-        windowsHide: true
-      })
-      this._rl = readline.createInterface({
-        input: this._process.stdout!
-      })
-      conf.menu.items.forEach(updateCheckedInLinux)
-      let counter = {id: 1}
-      conf.menu.items.forEach(_ => addInternalId(this.internalIdMap, _ as MenuItemEx, counter))
-      await resolveIcon(conf.menu)
-      if (conf.debug) {
-        this._rl.on('line', data => _debug('onLine', data))
+      try {
+        this._process = child.spawn(this._binPath, [], {
+          windowsHide: true
+        })
+        this._process.on('error', reject)
+        this._rl = readline.createInterface({
+          input: this._process.stdout!
+        })
+        conf.menu.items.forEach(updateCheckedInLinux)
+        let counter = {id: 1}
+        conf.menu.items.forEach(_ => addInternalId(this.internalIdMap, _ as MenuItemEx, counter))
+        await resolveIcon(conf.menu)
+        if (conf.debug) {
+          this._rl.on('line', data => _debug('onLine', data))
+        }
+        this.onReady(() => {
+          this.writeLine(JSON.stringify(menuTrimmer(conf.menu)))
+          resolve()
+        })
+      } catch (error) {
+        reject(error)
       }
-      this.onReady(() => {
-        this.writeLine(JSON.stringify(menuTrimmer(conf.menu)))
-        resolve()
-      })
     })
   }
 
