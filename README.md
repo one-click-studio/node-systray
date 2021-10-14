@@ -80,7 +80,7 @@ const systray = new SysTray({
     ]
   },
   debug: false,
-  copyDir: false // copy go tray binary to outside directory, useful for packing tool like pkg.
+  copyDir: false // copy go tray binary to an outside directory, useful for packing tool like pkg.
 })
 
 systray.onClick(action => {
@@ -92,6 +92,8 @@ systray.onClick(action => {
 // Systray.ready is a promise which resolves when the tray is ready.
 systray.ready().then(() => {
   console.log('systray started!')
+}).catch(err => {
+  console.log('systray failed to start: ' + err.message)
 })
 
 ```
@@ -100,7 +102,7 @@ To integrate with packing tools like `webpack`, use something like `copy-webpack
 
 ## Known Issues
 
-Toggling `hiding` on a menu item with sub menu causes the sub menu to disappear.
+Toggling `hiding` on a menu item with a sub-menu causes the sub-menu to disappear.
 
 ## License
 MIT
