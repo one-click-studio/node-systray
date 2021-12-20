@@ -56,7 +56,7 @@
     "index.test.ts",
     ".eslintrc.js",
     "menu.js",
-    "example.js"
+    "example.mjs"
   ],
   "exclude": [
     "./.history",

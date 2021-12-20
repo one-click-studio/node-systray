@@ -23,7 +23,8 @@ module.exports = {
     'parser': '@typescript-eslint/parser',
     'parserOptions': {
         'project': 'tsconfig-lint.json',
-        'sourceType': 'module'
+        'sourceType': 'module',
+        'extraFileExtensions': ['.mjs']
     },
     'plugins': [
         'eslint-plugin-import',
