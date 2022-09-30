@@ -17,14 +17,18 @@ import SysTray from 'systray2';
 import os from 'os'
 
 const item1 = {
-  title: 'aa',
-  tooltip: 'bb',
-  // checked is implemented by plain text in linux
+  title: 'Show Exit Button',
+  tooltip: 'This menu item will toggle the display of the exit button.',
+  // The "checked" property will create a check mark on the side of this menu item.
+  // To dynamically update the display of the check mark, use the "sendAction" method, as shown below.
+  // Note that "checked" is implemented by plain text in linux
   checked: false,
   enabled: true,
   // click is not a standard property but a custom value
   click: () => {
+    // change the state
     item1.checked = !item1.checked
+    // and then send it to the background tray service.
     systray.sendAction({
       type: 'update-item',
       item: item1,
