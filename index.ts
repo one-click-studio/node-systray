@@ -93,10 +93,16 @@ export interface Conf {
 }
 
 const getTrayBinPath = async (debug: boolean = false, copyDir: boolean | string = false) => {
+
+  const arch: 'amd64' | 'arm64' = ({
+    x64: 'amd64',
+    arm64: 'arm64'
+  })[process.arch] || 'amd64'
+
   const binName = ({
-    win32: `tray_windows${debug ? '' : '_release'}.exe`,
-    darwin: `tray_darwin${debug ? '' : '_release'}`,
-    linux: `tray_linux${debug ? '' : '_release'}`
+    win32: `tray_windows${debug ? '' : '_release'}-${arch}.exe`,
+    darwin: `tray_darwin${debug ? '' : '_release'}-${arch}`,
+    linux: `tray_linux${debug ? '' : '_release'}-${arch}`
   })[process.platform]
   let binPath = path.join('.', 'traybin', binName)
   if (!await fs.pathExists(binPath)) {
