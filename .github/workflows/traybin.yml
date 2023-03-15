@@ -2,9 +2,9 @@ name: Repository Dispatch
 on:
   repository_dispatch:
     types: [systray-portable-release]
-  push:
-    branches:
-      - master
+  # push:
+  #   branches:
+  #     - master
 
 jobs:
   update_releases:
@@ -14,8 +14,6 @@ jobs:
         uses: actions/checkout@v3
         with:
           token: ${{ secrets.CI_TOKEN }}
-
-      - run: ls -la ./traybin
 
       - name: download new latest systray-portable binaries
         env:
@@ -28,8 +26,6 @@ jobs:
           curl -L $RELEASE_URL/tray-linux-arm64       -o ./traybin/tray_linux_release-arm64
           curl -L $RELEASE_URL/tray-windows-amd64.exe -o ./traybin/tray_windows_release-amd64.exe
           chmod +x ./traybin/tray_*_release*
-
-      - run: ls -la ./traybin
 
       - name: add and commit
         uses: EndBug/add-and-commit@v9
