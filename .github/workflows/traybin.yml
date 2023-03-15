@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.CI_TOKEN }}
 
       - run: ls -la ./traybin
 
@@ -19,12 +21,12 @@ jobs:
         env:
           RELEASE_URL: https://github.com/one-click-studio/systray-portable/releases/download/latest
         run: |
-          rm -rf ./traybin/tray_*
-          curl -L $RELEASE_URL/tray-darwin-amd64      -o ./traybin/tray_darwin_release
-          curl -L $RELEASE_URL/tray-darwin-arm64      -o ./traybin/tray_darwin_release
-          curl -L $RELEASE_URL/tray-linux-amd64       -o ./traybin/tray_linux_release
-          curl -L $RELEASE_URL/tray-linux-arm64       -o ./traybin/tray_linux_release
-          curl -L $RELEASE_URL/tray-windows-amd64.exe -o ./traybin/tray_windows_release.exe
+          # rm -rf ./traybin/tray_*
+          curl -L $RELEASE_URL/tray-darwin-amd64      -o ./traybin/tray_darwin_release-amd64
+          curl -L $RELEASE_URL/tray-darwin-arm64      -o ./traybin/tray_darwin_release-arm64
+          curl -L $RELEASE_URL/tray-linux-amd64       -o ./traybin/tray_linux_release-amd64
+          curl -L $RELEASE_URL/tray-linux-arm64       -o ./traybin/tray_linux_release-arm64
+          curl -L $RELEASE_URL/tray-windows-amd64.exe -o ./traybin/tray_windows_release-amd64.exe
           chmod +x ./traybin/tray_*_release*
 
       - run: ls -la ./traybin
@@ -34,15 +36,8 @@ jobs:
         with:
           add: './traybin/*'
           fetch: false
-          author_name: oneclickstudio
-          author_email: contact@oneclickstudio.fr
+          author_name: tillderoquefeuil
+          author_email: tillderoquefeuil@gmail.com
           message: 'Github Actions - update traybin binaries from latest systray-portable release'
           push: true
-
-          # Determines the way the action fills missing author name and email. Three options are available:
-          # - github_actor -> UserName <UserName@users.noreply.github.com>
-          # - user_info -> Your Display Name <your-actual@email.com>
-          # - github_actions -> github-actions <email associated with the github logo>
-          # Default: github_actor
-          default_author: github_actions
 
