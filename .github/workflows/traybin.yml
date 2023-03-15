@@ -21,7 +21,7 @@ jobs:
         env:
           RELEASE_URL: https://github.com/one-click-studio/systray-portable/releases/download/latest
         run: |
-          # rm -rf ./traybin/tray_*
+          rm -rf ./traybin/tray_*
           curl -L $RELEASE_URL/tray-darwin-amd64      -o ./traybin/tray_darwin_release-amd64
           curl -L $RELEASE_URL/tray-darwin-arm64      -o ./traybin/tray_darwin_release-arm64
           curl -L $RELEASE_URL/tray-linux-amd64       -o ./traybin/tray_linux_release-amd64
