@@ -5,6 +5,7 @@
   "main": "index.js",
   "typings": "index.d.ts",
   "scripts": {
+    "prepare": "npm run build",
     "build": "tsc",
     "watch": "tsc --watch",
     "lint": "tslint ./src/** --type-check -p ./tsconfig.json",

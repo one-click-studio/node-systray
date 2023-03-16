@@ -94,7 +94,7 @@ export interface Conf {
 
 const getTrayBinPath = async (debug: boolean = false, copyDir: boolean | string = false) => {
 
-  const arch: 'amd64' | 'arm64' = ({
+  const arch: string = ({
     x64: 'amd64',
     arm64: 'arm64'
   })[process.arch] || 'amd64'
